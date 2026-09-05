@@ -449,9 +449,6 @@ Account Service, sin que nadie las haya llamado.
 
 ## Limitaciones conocidas
 
-Se listan explícitamente porque una solución sin limitaciones declaradas es una
-solución que no se ha revisado.
-
 1. **Sin Outbox Pattern.** El `SaveChanges` y la publicación del evento no son
    atómicos: si el proceso muere entre ambos, la réplica queda desactualizada sin que
    nada lo detecte. Es la limitación más relevante y la primera que se resolvería en
