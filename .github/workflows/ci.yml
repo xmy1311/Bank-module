@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Compilación y pruebas unitarias. Rápido: sin dependencias externas.
+  # ────────────────────────────────────────────────────────────────────────────
+  build-and-unit-tests:
+    name: Build + pruebas unitarias
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore Devsu.Banking.sln
+
+      - name: Build
+        run: dotnet build Devsu.Banking.sln -c Release --no-restore
+
+      - name: Pruebas unitarias
+        run: |
+          dotnet test tests/Devsu.Customer.UnitTests/Devsu.Customer.UnitTests.csproj -c Release --no-build --verbosity normal
+          dotnet test tests/Devsu.Account.UnitTests/Devsu.Account.UnitTests.csproj  -c Release --no-build --verbosity normal
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Pruebas de integración. Testcontainers levanta SQL Server real: es lento,
+  # así que va en un job aparte y no bloquea el feedback rápido del anterior.
+  # ────────────────────────────────────────────────────────────────────────────
+  integration-tests:
+    name: Pruebas de integración (Testcontainers)
+    runs-on: ubuntu-latest
+    needs: build-and-unit-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pruebas de integración
+        run: dotnet test tests/Devsu.Account.IntegrationTests/Devsu.Account.IntegrationTests.csproj -c Release --verbosity normal
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Verifica que las imágenes se construyen. Sin esto, "funciona en mi máquina"
+  # se descubre en la entrega, no en el pull request.
+  # ────────────────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Build de las imágenes Docker
+    runs-on: ubuntu-latest
+    needs: build-and-unit-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Customer Service
+        run: docker build -f src/Services/Customer/Devsu.Customer.Api/Dockerfile -t devsu/customer-api:ci .
+
+      - name: Account Service
+        run: docker build -f src/Services/Account/Devsu.Account.Api/Dockerfile -t devsu/account-api:ci .

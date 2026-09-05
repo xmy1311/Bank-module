@@ -1,0 +1,18 @@
+<Project>
+
+  <!-- Propiedades comunes a TODOS los proyectos de la solución.
+       Centralizarlas evita que cada .csproj repita lo mismo y diverja. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!-- NO activar InvariantGlobalization: Microsoft.Data.SqlClient lo rechaza con
+         "Globalization Invariant Mode is not supported" al abrir la conexión.
+         SqlClient necesita ICU para las comparaciones sensibles a intercalación.
+         Reduciría el tamaño de la imagen, pero es incompatible con SQL Server. -->
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,52 @@
+# ==============================================================================
+# Debe estar en la RAÍZ DEL CONTEXTO DE BUILD (aquí), no junto al Dockerfile.
+# docker-compose.yml usa "context: ." y Docker lee <contexto>/.dockerignore.
+#
+# Sin este archivo, COPY src/ src/ se lleva las carpetas obj/ generadas en la
+# máquina de desarrollo. Dentro contienen project.assets.json con rutas
+# absolutas de Windows, y el build falla con:
+#
+#   Unable to find fallback package folder
+#   'C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages'
+#
+# Además reduce el contexto de ~125 MB a unos pocos cientos de KB.
+# ==============================================================================
+
+# ── Artefactos de compilación: la causa del fallo ─────────────────────────────
+**/bin/
+**/obj/
+**/publish/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/UpgradeLog*.htm
+**/*.bak
+
+# ── Control de versiones ──────────────────────────────────────────────────────
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# ── Secretos: NUNCA deben entrar en una imagen ────────────────────────────────
+.env
+.env.*
+!.env.example
+**/appsettings.Production.json
+**/secrets.json
+
+# ── No hace falta para construir las APIs ─────────────────────────────────────
+tests/
+postman/
+docs/
+*.md
+docker-compose*.yml
+BaseDatos.sql
+
+# ── Resultados de pruebas ─────────────────────────────────────────────────────
+**/TestResults/
+**/coverage*/

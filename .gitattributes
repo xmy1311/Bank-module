@@ -1,0 +1,18 @@
+# Normaliza los finales de linea: LF en el repositorio, nativos en el disco.
+# Sin esto, los archivos que genera Visual Studio (CRLF) y los escritos en
+# Linux (LF) conviven mezclados en el mismo commit.
+* text=auto
+
+# Visual Studio siempre reescribe el .sln en CRLF: fijarlo evita que el
+# archivo aparezca modificado cada vez que se abre la solucion.
+*.sln text eol=crlf
+
+# Scripts que deben conservar LF aunque se editen en Windows.
+*.sh  text eol=lf
+
+# Binarios: git no debe tocarlos ni intentar diferenciarlos.
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+*.dll binary

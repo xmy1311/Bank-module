@@ -1,0 +1,48 @@
+## .NET
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.user
+*.suo
+*.userprefs
+.vs/
+.vscode/
+.idea/
+*.swp
+
+## Publicación
+publish/
+*.publishsettings
+
+## Secretos y entorno — NUNCA se versionan
+.env
+.env.local
+*.env
+appsettings.Production.json
+appsettings.Local.json
+secrets.json
+
+## Artefactos del asistente de migración de Visual Studio
+UpgradeLog*.htm
+UpgradeLog*.XML
+_UpgradeReport_Files/
+Backup*/
+
+## Copias de seguridad locales
+*.bak
+
+## Docker
+.docker/data/
+
+## Tests
+[Tt]est[Rr]esult*/
+coverage*/
+*.coverage
+*.trx
+
+## SO
+.DS_Store
+Thumbs.db

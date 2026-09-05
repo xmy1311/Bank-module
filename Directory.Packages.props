@@ -1,0 +1,82 @@
+<Project>
+
+  <!-- Central Package Management: las versiones viven AQUI y los .csproj solo
+       declaran <PackageReference Include="..." /> sin Version. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="Entity Framework Core">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Abstracciones de la BCL">
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="API / OpenAPI">
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+
+    <!-- Swashbuckle 10.x usa Microsoft.OpenApi 2.x; la 9.x todavia usa la 1.6.x.
+         Con .NET 10 hay que quedarse en la 10.x: bajarla a 9.x crea un conflicto
+         irresoluble con Microsoft.AspNetCore.OpenApi. -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
+
+    <!-- ======================================================================
+         PIN CRITICO: hay que quedarse en la linea 2.x, y no por debajo de 2.7.5.
+
+         LIMITE SUPERIOR (por que no 3.x)
+         Microsoft.AspNetCore.OpenApi 10.0.0 declara "Microsoft.OpenApi (>= 2.0.0)",
+         que es un MINIMO, asi que NuGet resuelve la mas alta publicada. La 3.x
+         convirtio IOpenApiMediaType.Example en solo lectura, pero el generador de
+         codigo de ASP.NET Core 10 sigue asignandola. Resultado: CS0200 en
+         OpenApiXmlCommentSupport.generated.cs y CS7069 al resolver OpenApiInfo.
+         Bug conocido: dotnet/aspnetcore#64317.
+
+         LIMITE INFERIOR (por que no 2.0.0)
+         Dos razones. Swashbuckle.AspNetCore.Swagger 10.2.3 exige >= 2.7.5, asi
+         que cualquier version menor produce NU1109 (package downgrade). Y todo
+         lo anterior a 2.7.5 arrastra GHSA-v5pm-xwqc-g5wc, de severidad alta:
+         referencias circulares de esquema provocan un desbordamiento de pila que
+         termina el proceso. Las versiones parcheadas son 2.7.5 y 3.5.4.
+
+         2.7.5 es la unica que cumple las tres condiciones: sin vulnerabilidad,
+         compatible con Swashbuckle y con el generador de ASP.NET Core 10.
+         ====================================================================== -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.7.5" />
+  </ItemGroup>
+
+  <ItemGroup Label="Mensajeria">
+    <!-- 7.x tiene la API completamente asincrona: IChannel en lugar de IModel,
+         metodos *Async y AsyncEventingBasicConsumer.ReceivedAsync. -->
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <!-- La 2.4.3 es de 2021 y no descubre pruebas en .NET 10. -->
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="NSubstitute" Version="5.5.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.8.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Pins de seguridad (dependencias transitivas)">
+    <!-- Fuerzan versiones sin vulnerabilidades conocidas en dependencias
+         transitivas. No se usan directamente en el codigo. -->
+    <PackageVersion Include="SSH.NET" Version="2026.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.10" />
+  </ItemGroup>
+
+</Project>
